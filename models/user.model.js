@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     avatar: { type: String },
     accessToken: { type: String },
+    isVerified: { type: Boolean, default: false },
+    otp: { type: String },
     role: {
       type: String,
       enum: ["user", "seller", "admin"],
