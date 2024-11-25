@@ -9,47 +9,20 @@ const authMiddleware = async (req, res, next) => {
       : null);
 
   if (!token) {
-    return res.status(401).json({ error: "لا تستطيع الوصول لهذه الصفحة" });
+    return res.status(401).json({ error: "Unauthorized access" });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    jwt.verify(token, JWT_SECRET, async (err, decoded) => {
-      if (err) {
-        if (err.message === "jwt expired") {
-          return res.status(401).json({ error: "تم انتهاء الصلاحية" });
-        }
-        return res.status(401).json({ error: err.message });
-      }
+    req.userId = decoded._id;
+    req.role = decoded.role;
 
-      req.userId = decoded._id;
-      req.role = decoded.role;
+    const user = await User.findById(decoded._id);
+    if (!user || user.role !== decoded.role) {
+      return res.status(401).json({ error: "Unauthorized access" });
+    }
 
-      if (decoded.role === "admin") {
-        const admin = await User.findById(decoded.id);
-        if (!admin) {
-          return res
-            .status(401)
-            .json({ error: "لا تستطيع الوصول لهذه الصفحة" });
-        }
-      } else if (decoded.role === "seller") {
-        const seller = await User.findById(decoded.id);
-        if (!seller) {
-          return res
-            .status(401)
-            .json({ error: "لا تستطيع الوصول لهذه الصفحة" });
-        }
-      } else if (decoded.role === "user") {
-        const user = await User.findById(decoded.id);
-        if (!user) {
-          return res
-            .status(401)
-            .json({ error: "لا تستطيع الوصول لهذه الصفحة" });
-        }
-      }
-
-      next();
-    });
+    next();
   } catch (error) {
     return res.status(401).json({ error: error.message });
   }
