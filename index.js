@@ -8,6 +8,7 @@ import connectCloudinary from "./utils/cloudinary.js";
 import authRoutes from "./routers/auth.routes.js";
 import productRoutes from "./routers/product.routes.js";
 import categoriesAndSubCategoriesRoutes from "./routers/categoriesAndSub-categories.routes.js";
+import cartRoutes from "./routers/cart.routes.js";
 
 dotenv.config();
 const app = express();
@@ -34,6 +35,7 @@ const PORT = process.env.PORT || 5000;
 app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/category", categoriesAndSubCategoriesRoutes);
+app.use("/api/cart", cartRoutes);
 
 const startServer = async () => {
   await connectDB();

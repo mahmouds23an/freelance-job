@@ -14,13 +14,15 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded._id;
-    req.role = decoded.role;
 
     const user = await User.findById(decoded._id);
     if (!user || user.role !== decoded.role) {
       return res.status(401).json({ error: "Unauthorized access" });
     }
+
+    req.userId = decoded._id;
+    req.role = decoded.role;
+    req.user = user;
 
     next();
   } catch (error) {

@@ -61,4 +61,19 @@ const addProduct = async (req, res) => {
   }
 };
 
-export { addProduct };
+const getProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+    if (!products) {
+      return res.status(404).json({ message: "Products not found" });
+    }
+    if (products.length === 0) {
+      return res.status(200).json({ message: "No products found" });
+    }
+    return res.status(200).json(products);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export { addProduct, getProducts };
