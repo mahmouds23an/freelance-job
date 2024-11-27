@@ -35,13 +35,14 @@ const getCart = async (req, res) => {
     const userId = req.user._id;
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
     if (!cart) return res.status(404).json({ message: "Cart not found" });
-    res.status(200).json(cart);
+    const cartItemsCount = cart.items.length;
+    return res.status(200).json({ cartItemsCount, ...cart.toObject() });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-const deleteCartItem = async (req, res) => {
+const removeItemFromCart = async (req, res) => {
   try {
     const { itemId } = req.params;
     const userId = req.userId;
@@ -50,7 +51,7 @@ const deleteCartItem = async (req, res) => {
     if (!cart) return res.status(404).json({ message: "Cart not found" });
 
     const itemIndex = cart.items.findIndex(
-      (item) => item._id.toString() === itemId
+      (item) => item.product._id.toString() === itemId
     );
     if (itemIndex === -1)
       return res.status(404).json({ message: "Service not found in cart" });
@@ -58,10 +59,14 @@ const deleteCartItem = async (req, res) => {
     cart.items.splice(itemIndex, 1);
     await cart.save();
 
-    res.status(200).json({ message: "Service removed from cart", cart });
+    return res.status(200).json({
+      message: "Service removed from cart",
+      cart,
+      cartItemsCount: cart.items.length,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-export { addToCart, getCart, deleteCartItem };
+export { addToCart, getCart, removeItemFromCart };
