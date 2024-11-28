@@ -13,6 +13,7 @@ router.post(
     { name: "image2", maxCount: 1 },
     { name: "image3", maxCount: 1 },
     { name: "image4", maxCount: 1 },
+    { name: "file", maxCount: 1 },
   ]),
   authMiddleware,
   addProduct

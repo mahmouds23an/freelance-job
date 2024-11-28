@@ -14,7 +14,6 @@ const addProduct = async (req, res) => {
       purchasableManyTimes,
       seller,
       status,
-      fileUrl,
     } = req.body;
 
     const existingProduct = await Product.findOne({ name });
@@ -22,15 +21,15 @@ const addProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists" });
     }
 
-    const image1 = req.files.image1 && req.files.image1[0];
-    const image2 = req.files.image2 && req.files.image2[0];
-    const image3 = req.files.image3 && req.files.image3[0];
-    const image4 = req.files.image4 && req.files.image4[0];
-    const images = [image1, image2, image3, image4].filter(
-      (item) => item !== undefined
-    );
+    // Process image uploads
+    const images = [
+      req.files.image1 && req.files.image1[0],
+      req.files.image2 && req.files.image2[0],
+      req.files.image3 && req.files.image3[0],
+      req.files.image4 && req.files.image4[0],
+    ].filter(Boolean);
 
-    let imagesUrl = await Promise.all(
+    const imageUrls = await Promise.all(
       images.map(async (item) => {
         const result = await cloudinary.uploader.upload(item.path, {
           resource_type: "image",
@@ -38,6 +37,14 @@ const addProduct = async (req, res) => {
         return result.secure_url;
       })
     );
+
+    let fileUrl = null;
+    if (req.files.file && req.files.file[0]) {
+      const result = await cloudinary.uploader.upload(req.files.file[0].path, {
+        resource_type: "raw",
+      });
+      fileUrl = result.secure_url;
+    }
 
     const newProduct = new Product({
       name,
@@ -48,13 +55,14 @@ const addProduct = async (req, res) => {
       seller,
       status,
       fileUrl,
-      image: imagesUrl,
+      image: imageUrls,
     });
 
     await newProduct.save();
 
     return res.status(201).json({
       message: "Product added successfully",
+      product: newProduct,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

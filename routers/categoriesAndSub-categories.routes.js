@@ -1,6 +1,10 @@
 import express from "express";
 
 import {
+  addTitle,
+  editTitle,
+  deleteTitle,
+  getTitles,
   addCategory,
   editCategory,
   deleteCategory,
@@ -13,6 +17,12 @@ import {
 import authMiddleware from "../middlewares/auth.mw.js";
 
 const router = express.Router();
+
+// Titles
+router.post("/add-title", authMiddleware, addTitle);
+router.put("/edit-title/:id", authMiddleware, editTitle);
+router.delete("/delete-title/:id", authMiddleware, deleteTitle);
+router.get("/get-titles", getTitles);
 
 // Categories
 router.post("/add-category", authMiddleware, addCategory);
