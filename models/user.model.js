@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema(
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    avatar: { type: String },
+    avatar: {
+      type: String,
+      default:
+        "https://w7.pngwing.com/pngs/463/441/png-transparent-avatar-human-people-profile-user-web-user-interface-icon.png",
+    },
     accessToken: { type: String },
     isVerified: { type: Boolean, default: false },
     otp: { type: String },

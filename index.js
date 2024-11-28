@@ -9,6 +9,7 @@ import authRoutes from "./routers/auth.routes.js";
 import productRoutes from "./routers/product.routes.js";
 import categoriesAndSubCategoriesRoutes from "./routers/categoriesAndSub-categories.routes.js";
 import cartRoutes from "./routers/cart.routes.js";
+import userRoutes from "./routers/user.routes.js";
 
 dotenv.config();
 const app = express();
@@ -36,6 +37,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/category", categoriesAndSubCategoriesRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/user", userRoutes);
 
 const startServer = async () => {
   await connectDB();
