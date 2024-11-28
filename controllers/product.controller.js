@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import Product from "../models/product.model.js";
+import User from "../models/user.model.js";
 
 const addProduct = async (req, res) => {
   if (req.role !== "seller") {
@@ -84,4 +85,123 @@ const getProducts = async (req, res) => {
   }
 };
 
-export { addProduct, getProducts };
+const addReview = async (req, res) => {
+  if (req.role !== "user") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const { productId, rate, comment } = req.body;
+    const userId = req.userId;
+
+    const user = await User.findById(userId);
+    const product = await Product.findById(productId);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const existingReview = product.reviews.find(
+      (review) => review.user.userId.toString() === userId.toString()
+    );
+
+    if (existingReview) {
+      return res
+        .status(400)
+        .json({ message: "You have already reviewed this product" });
+    }
+
+    const newReview = {
+      user: { userId, userName: `${user.firstName} ${user.lastName}` },
+      rate,
+      comment,
+    };
+
+    product.reviews.push(newReview);
+    await product.save();
+
+    return res.status(201).json({ message: "Review added successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const editReview = async (req, res) => {
+  if (req.role !== "user") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const { productId, rate, comment } = req.body;
+    const userId = req.userId;
+
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const review = product.reviews.find(
+      (r) => r.user.userId.toString() === userId.toString()
+    );
+
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    review.rate = rate;
+    review.comment = comment;
+    await product.save();
+
+    return res.status(200).json({ message: "Review updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteReview = async (req, res) => {
+  if (req.role !== "user") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const { productId } = req.params;
+    const userId = req.userId;
+
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    const reviewIndex = product.reviews.findIndex(
+      (r) => r.user.userId.toString() === userId.toString()
+    );
+
+    if (reviewIndex === -1) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    product.reviews.splice(reviewIndex, 1);
+    await product.save();
+
+    return res.status(200).json({ message: "Review deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const getProductReviews = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findById(productId).populate(
+      "reviews.user.userId",
+      "reviews.user.firstName"
+    );
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
+
+    return res.status(200).json(product.reviews);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export {
+  addProduct,
+  getProducts,
+  addReview,
+  editReview,
+  deleteReview,
+  getProductReviews,
+};

@@ -1,11 +1,19 @@
 import express from "express";
 
-import { addProduct, getProducts } from "../controllers/product.controller.js";
+import {
+  addProduct,
+  getProducts,
+  addReview,
+  editReview,
+  deleteReview,
+  getProductReviews,
+} from "../controllers/product.controller.js";
 import upload from "../middlewares/multer.js";
 import authMiddleware from "../middlewares/auth.mw.js";
 
 const router = express.Router();
 
+// Products
 router.post(
   "/add",
   upload.fields([
@@ -19,5 +27,11 @@ router.post(
   addProduct
 );
 router.get("/get", getProducts);
+
+// Reviews
+router.post("/add-review", authMiddleware, addReview);
+router.put("/edit-review", authMiddleware, editReview);
+router.delete("/delete-review", authMiddleware, deleteReview);
+router.get("/get-reviews/:productId", getProductReviews);
 
 export default router;

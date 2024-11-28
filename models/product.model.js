@@ -1,5 +1,21 @@
 import mongoose from "mongoose";
 
+const reviewSchema = new mongoose.Schema(
+  {
+    user: {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+      userName: { type: String, required: true },
+    },
+    rate: { type: Number, required: true, min: 1, max: 5 },
+    comment: { type: String, required: true },
+  },
+  { timestamps: true }
+);
+
 const productSchema = new mongoose.Schema(
   {
     image: { type: Array, required: true },
@@ -19,6 +35,7 @@ const productSchema = new mongoose.Schema(
       default: "pending",
     },
     fileUrl: { type: String, required: true },
+    reviews: [reviewSchema],
   },
   { timestamps: true }
 );
