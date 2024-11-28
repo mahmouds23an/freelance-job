@@ -110,7 +110,7 @@ const addReview = async (req, res) => {
     }
 
     const newReview = {
-      user: { userId, userName: `${user.firstName} ${user.lastName}` },
+      user: { userId, userName: `${user.firstName}` },
       rate,
       comment,
     };
