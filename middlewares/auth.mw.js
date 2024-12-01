@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import mongoose from "mongoose";
 
 const authMiddleware = async (req, res, next) => {
   const token =
@@ -14,6 +15,7 @@ const authMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = new mongoose.Types.ObjectId(decoded._id);
 
     const user = await User.findById(decoded._id);
     if (!user || user.role !== decoded.role) {

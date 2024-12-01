@@ -154,7 +154,7 @@ const editReview = async (req, res) => {
 };
 
 const deleteReview = async (req, res) => {
-  if (req.role !== "user") {
+  if (req.role !== "admin") {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {

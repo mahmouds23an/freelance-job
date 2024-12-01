@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "seller", "admin"],
       default: "user",
     },
+    purchasedProducts: [
+      { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    ],
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     wallet: {
       balance: { type: Number, default: 0 },

@@ -10,6 +10,7 @@ import productRoutes from "./routers/product.routes.js";
 import categoriesAndSubCategoriesRoutes from "./routers/categoriesAndSub-categories.routes.js";
 import cartRoutes from "./routers/cart.routes.js";
 import userRoutes from "./routers/user.routes.js";
+import orderRoutes from "./routers/order.routes.js";
 
 dotenv.config();
 const app = express();
@@ -38,6 +39,7 @@ app.use("/api/product", productRoutes);
 app.use("/api/category", categoriesAndSubCategoriesRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/order", orderRoutes);
 
 const startServer = async () => {
   await connectDB();
