@@ -27,10 +27,15 @@ const userSchema = new mongoose.Schema(
       balance: { type: Number, default: 0 },
       transactions: [
         {
-          type: { type: String, enum: ["credit", "debit"], required: true },
+          type: {
+            type: String,
+            enum: ["credit", "debit"],
+            default: "credit",
+            required: true,
+          },
           amount: { type: Number, required: true },
           date: { type: Date, default: Date.now },
-          description: { type: String },
+          // description: { type: String },
         },
       ],
     },

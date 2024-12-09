@@ -6,12 +6,21 @@ import { generateOtp, sendEmail } from "../utils/mailer.js";
 const register = async (req, res) => {
   try {
     const { firstName, lastName, email, password, avatar, role } = req.body;
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = generateOtp();
+
+    let otp = null;
+    let isVerified = false;
+
+    if (role !== "seller") {
+      otp = generateOtp();
+    }
+
     const user = new User({
       firstName,
       lastName,
@@ -20,15 +29,24 @@ const register = async (req, res) => {
       avatar,
       role,
       otp,
+      isVerified,
       wallet: { balance: 0, transactions: [] },
     });
+
     await user.save();
-    const subject = "Your OTP Code";
-    const htmlContent = `<p>Your OTP code is <strong>${otp}</strong>. Please use this code to verify your account.</p>`;
-    await sendEmail(email, subject, htmlContent);
-    res
-      .status(201)
-      .json({ message: "User registered successfully, Check your mail" });
+
+    if (role !== "seller") {
+      const subject = "Your OTP Code";
+      const htmlContent = `<p>Your OTP code is <strong>${otp}</strong>. Please use this code to verify your account.</p>`;
+      await sendEmail(email, subject, htmlContent);
+    }
+
+    return res.status(201).json({
+      message:
+        role === "seller"
+          ? "Seller registered successfully, waiting for admin verification."
+          : "User registered successfully, check your mail.",
+    });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
