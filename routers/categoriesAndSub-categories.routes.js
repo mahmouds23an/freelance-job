@@ -13,6 +13,7 @@ import {
   editSubCategory,
   deleteSubCategory,
   getSubCategories,
+  getServiceByPath,
 } from "../controllers/categoriesAndSub.controller.js";
 import authMiddleware from "../middlewares/auth.mw.js";
 
@@ -35,5 +36,8 @@ router.post("/add-sub-category", authMiddleware, addSubCategory);
 router.put("/edit-sub-category/:id", authMiddleware, editSubCategory);
 router.delete("/delete-sub-category/:id", authMiddleware, deleteSubCategory);
 router.get("/get-sub-categories", getSubCategories);
+
+// Services
+router.get("/:titleName/:categoryName/:subCategoryName", getServiceByPath);
 
 export default router;

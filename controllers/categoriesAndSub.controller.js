@@ -222,6 +222,45 @@ const getSubCategories = async (req, res) => {
   }
 };
 
+const getServiceByPath = async (req, res) => {
+  try {
+    const { titleName, categoryName, subCategoryName } = req.params;
+    const title = await Title.findOne({ name: titleName }).populate(
+      "categories"
+    );
+    if (!title) {
+      return res.status(404).json({ message: "Title not found" });
+    }
+
+    const category = await Category.findOne({
+      name: categoryName,
+      title: title._id,
+    }).populate("subCategories");
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    const subCategory = await SubCategory.findOne({
+      name: subCategoryName,
+      category: category._id,
+    });
+    if (!subCategory) {
+      return res.status(404).json({ message: "Sub-category not found" });
+    }
+
+    return res.status(200).json({
+      message: "Service found",
+      data: {
+        title: title.name,
+        category: category.name,
+        subCategory: subCategory.name,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   addTitle,
   editTitle,
@@ -235,4 +274,5 @@ export {
   editSubCategory,
   deleteSubCategory,
   getSubCategories,
+  getServiceByPath,
 };
