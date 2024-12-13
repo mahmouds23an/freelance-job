@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import passport from "passport";
+import session from "express-session";
 
 import connectCloudinary from "./utils/cloudinary.js";
 import authRoutes from "./routers/auth.routes.js";
@@ -12,6 +14,7 @@ import cartRoutes from "./routers/cart.routes.js";
 import userRoutes from "./routers/user.routes.js";
 import orderRoutes from "./routers/order.routes.js";
 import adminRoutes from "./routers/admin.routes.js";
+import googleAuthRoutes from "./routers/googleAuth.routes.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +28,10 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(session({ secret: "your-secret-key", resave: false, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(googleAuthRoutes);
 
 const connectDB = async () => {
   try {
