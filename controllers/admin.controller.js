@@ -34,13 +34,22 @@ const adminApprovePendingProduct = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const { productId } = req.params;
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate(
+      "seller",
+      "email"
+    );
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    if (product.status === "approved") {
+      return res.status(400).json({ message: "Product is already approved" });
+    }
     product.status = "approved";
     await product.save();
+    const subject = "Good news";
+    const htmlContent = `<p>Your product has been verified successfully</p>`;
+    await sendEmail(product.seller.email, subject, htmlContent);
     return res.status(200).json({ message: "Product verified successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -77,13 +86,19 @@ const adminRefusePendingProduct = async (req, res) => {
       return res.status(401).json({ error: "Unauthorized" });
     }
     const { productId } = req.params;
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).populate(
+      "seller",
+      "email"
+    );
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
     product.status = "rejected";
     await Product.findByIdAndDelete(productId);
+    const subject = "Bad news";
+    const htmlContent = `<p>Your product has been removed</p>`;
+    await sendEmail(product.seller.email, subject, htmlContent);
     return res.status(200).json({ message: "Product removed successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
