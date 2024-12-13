@@ -105,4 +105,71 @@ const logout = async (req, res) => {
   }
 };
 
-export { register, verifyOtp, login, logout };
+const sendOtpForReset = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const otp = generateOtp();
+    user.otp = otp;
+    await user.save();
+    const subject = "Your OTP Code";
+    const htmlContent = `<p>Your OTP code is <strong>${otp}</strong>. Please use this code to reset your password.</p>`;
+    await sendEmail(email, subject, htmlContent);
+    return res.status(200).json({ message: "OTP sent successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const verifyResetOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    return res.status(200).json({ message: "OTP verified successfully." });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.otp = null;
+    await user.save();
+
+    return res.status(200).json({ message: "Password reset successfully." });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export {
+  register,
+  verifyOtp,
+  login,
+  logout,
+  sendOtpForReset,
+  verifyResetOtp,
+  resetPassword,
+};

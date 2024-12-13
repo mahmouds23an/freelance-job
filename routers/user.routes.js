@@ -6,6 +6,7 @@ import {
   changePassword,
   changeAvatar,
   removeAvatar,
+  userDeleteHisAccount,
 } from "../controllers/user.controller.js";
 import authMiddleware from "../middlewares/auth.mw.js";
 import upload from "../middlewares/multer.js";
@@ -22,5 +23,6 @@ router.put(
   changeAvatar
 );
 router.delete("/remove-avatar", authMiddleware, removeAvatar);
+router.delete("/delete-account", authMiddleware, userDeleteHisAccount);
 
 export default router;
