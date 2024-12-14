@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import Product from "../models/product.model.js";
 import User from "../models/user.model.js";
+import { SubCategory } from "../models/catAndSubCat.model.js";
 
 const addProduct = async (req, res) => {
   if (req.role !== "seller") {
@@ -11,7 +12,7 @@ const addProduct = async (req, res) => {
       name,
       description,
       price,
-      category,
+      subCategory,
       purchasableManyTimes,
       seller,
       status,
@@ -20,6 +21,11 @@ const addProduct = async (req, res) => {
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
       return res.status(400).json({ message: "Product already exists" });
+    }
+
+    const existingSubCategory = await SubCategory.findById(subCategory);
+    if (!existingSubCategory) {
+      return res.status(404).json({ message: "SubCategory not found" });
     }
 
     // Process image uploads
@@ -51,7 +57,7 @@ const addProduct = async (req, res) => {
       name,
       description,
       price,
-      category,
+      subCategory,
       purchasableManyTimes,
       seller,
       status,

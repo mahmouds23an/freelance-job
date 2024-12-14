@@ -23,11 +23,15 @@ const productSchema = new mongoose.Schema(
     description: { type: String, required: true },
     price: { type: Number, required: true },
     discountedPrice: { type: Number },
-    category: { type: String, required: true },
     purchasableManyTimes: { type: Boolean, default: true },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    subCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
       required: true,
     },
     status: {

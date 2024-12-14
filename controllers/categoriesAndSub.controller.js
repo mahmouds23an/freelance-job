@@ -1,93 +1,17 @@
-import { Title, Category, SubCategory } from "../models/catAndSubCat.model.js";
-
-const addTitle = async (req, res) => {
-  if (req.role !== "admin") {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  try {
-    const { name } = req.body;
-    const existingTitle = await Title.findOne({ name });
-    if (existingTitle) {
-      return res.status(400).json({ message: "Title already exists" });
-    }
-    const title = new Title({ name });
-    await title.save();
-    return res.status(201).json({ message: "Title added successfully", title });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-const editTitle = async (req, res) => {
-  if (req.role !== "admin") {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  try {
-    const { id } = req.params;
-    const { name } = req.body;
-    const title = await Title.findById(id);
-    if (!title) {
-      return res.status(404).json({ message: "Title not found" });
-    }
-    title.name = name;
-    await title.save();
-    return res.status(200).json({ message: "Title updated successfully" });
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-const deleteTitle = async (req, res) => {
-  if (req.role !== "admin") {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  try {
-    const { id } = req.params;
-    const title = await Title.findByIdAndDelete(id);
-    if (!title) return res.status(404).json({ message: "Title not found" });
-    await Category.updateMany({ title: id }, { $unset: { title: "" } });
-    res.status(200).json({ message: "Title deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const getTitles = async (req, res) => {
-  try {
-    const titles = await Title.find()
-      .populate({
-        path: "categories",
-        select: "name",
-        populate: { path: "subCategories", select: "name" },
-      })
-      .exec();
-    if (!titles) {
-      return res.status(404).json({ message: "Titles not found" });
-    }
-    return res.status(200).json(titles);
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
+import { Category, SubCategory } from "../models/catAndSubCat.model.js";
 
 const addCategory = async (req, res) => {
   if (req.role !== "admin") {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    const { name, titleId } = req.body;
-    const title = await Title.findById(titleId);
-    if (!title) {
-      return res.status(404).json({ message: "Title not found" });
-    }
+    const { name } = req.body;
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
       return res.status(400).json({ message: "Category already exists" });
     }
-    const category = new Category({ name, title: titleId });
+    const category = new Category({ name });
     await category.save();
-    title.categories.push(category._id);
-    await title.save();
     return res.status(201).json({ message: "Category added successfully" });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -133,8 +57,15 @@ const deleteCategory = async (req, res) => {
 const getCategories = async (req, res) => {
   try {
     const categories = await Category.find()
-      .populate("title", "name")
-      .populate("subCategories", "name")
+      .populate({
+        path: "subCategories",
+        select: "name",
+        populate: {
+          path: "products",
+          model: "Product",
+          select: "name price description",
+        }
+      })
       .exec();
     if (!categories) {
       return res.status(404).json({ message: "Categories not found" });
@@ -208,7 +139,11 @@ const deleteSubCategory = async (req, res) => {
 const getSubCategories = async (req, res) => {
   try {
     const subCategories = await SubCategory.find()
-      .populate({ path: "category", select: "name" })
+      .populate({ path: "category", select: "name" }).populate({
+        path: "products",
+        model: "Product",
+        select: "name price description",
+      })
       .exec();
     if (!subCategories) {
       return res.status(404).json({ message: "Sub-categories not found" });
@@ -224,17 +159,10 @@ const getSubCategories = async (req, res) => {
 
 const getServiceByPath = async (req, res) => {
   try {
-    const { titleName, categoryName, subCategoryName } = req.params;
-    const title = await Title.findOne({ name: titleName }).populate(
-      "categories"
-    );
-    if (!title) {
-      return res.status(404).json({ message: "Title not found" });
-    }
+    const { categoryName, subCategoryName } = req.params;
 
     const category = await Category.findOne({
       name: categoryName,
-      title: title._id,
     }).populate("subCategories");
     if (!category) {
       return res.status(404).json({ message: "Category not found" });
@@ -251,7 +179,6 @@ const getServiceByPath = async (req, res) => {
     return res.status(200).json({
       message: "Service found",
       data: {
-        title: title.name,
         category: category.name,
         subCategory: subCategory.name,
       },
@@ -262,10 +189,6 @@ const getServiceByPath = async (req, res) => {
 };
 
 export {
-  addTitle,
-  editTitle,
-  deleteTitle,
-  getTitles,
   addCategory,
   editCategory,
   deleteCategory,

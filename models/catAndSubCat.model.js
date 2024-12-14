@@ -1,25 +1,8 @@
 import mongoose from "mongoose";
 
-const titleSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true, unique: true },
-    categories: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Category",
-      },
-    ],
-  },
-  { timestamps: true }
-);
-
 const categorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
-    title: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Title",
-    },
     subCategories: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -42,8 +25,16 @@ const subCategorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Title = mongoose.model("Title", titleSchema);
+subCategorySchema.virtual("products", {
+  ref: "Product",
+  localField: "_id",
+  foreignField: "subCategory", 
+});
+
+subCategorySchema.set("toObject", { virtuals: true });
+subCategorySchema.set("toJSON", { virtuals: true });
+
 const Category = mongoose.model("Category", categorySchema);
 const SubCategory = mongoose.model("SubCategory", subCategorySchema);
 
-export { Title, Category, SubCategory };
+export { Category, SubCategory };
