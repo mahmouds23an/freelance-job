@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import generateToken from "../utils/generateToken.js";
 import { generateOtp, sendEmail } from "../utils/mailer.js";
+import generateUsername from "../utils/generateUserName.js";
 
 const register = async (req, res) => {
   try {
@@ -21,10 +22,13 @@ const register = async (req, res) => {
       otp = generateOtp();
     }
 
+    const username = await generateUsername(firstName, lastName);
+
     const user = new User({
       firstName,
       lastName,
       email,
+      username,
       password: hashedPassword,
       avatar,
       role,
@@ -33,7 +37,7 @@ const register = async (req, res) => {
       wallet: { balance: 0, transactions: [] },
     });
 
-    await user.save();
+    const savedUser = await user.save();
 
     if (role !== "seller") {
       const subject = "Your OTP Code";
@@ -42,6 +46,7 @@ const register = async (req, res) => {
     }
 
     return res.status(201).json({
+      data: savedUser,
       message:
         role === "seller"
           ? "Seller registered successfully, waiting for admin verification."
