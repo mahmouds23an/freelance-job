@@ -64,7 +64,7 @@ const getCategories = async (req, res) => {
         populate: {
           path: "products",
           model: "Product",
-          select: "name price description",
+          select: "name price description discountedPrice serviceStatus fileUrl image",
           match: { status: "approved" },
           populate: {
             path: "seller",
