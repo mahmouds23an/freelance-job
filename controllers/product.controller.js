@@ -14,9 +14,10 @@ const addProduct = async (req, res) => {
       price,
       subCategory,
       purchasableManyTimes,
-      seller,
       status,
     } = req.body;
+
+    const seller = req.userId;
 
     const existingProduct = await Product.findOne({ name });
     if (existingProduct) {

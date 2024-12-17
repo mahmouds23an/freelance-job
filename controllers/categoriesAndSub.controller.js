@@ -59,16 +59,26 @@ const getCategories = async (req, res) => {
     const categories = await Category.find()
       .populate({
         path: "subCategories",
+        model: "SubCategory",
         select: "name",
         populate: {
           path: "products",
           model: "Product",
           select: "name price description",
-        }
+          match: { status: "approved" },
+          populate: {
+            path: "seller",
+            model: "User",
+            select: "firstName lastName",
+          },
+        },
       })
       .exec();
     if (!categories) {
       return res.status(404).json({ message: "Categories not found" });
+    }
+    if (categories.length === 0) {
+      return res.status(200).json({ message: "No categories found" });
     }
     return res.status(200).json(categories);
   } catch (error) {
@@ -139,7 +149,8 @@ const deleteSubCategory = async (req, res) => {
 const getSubCategories = async (req, res) => {
   try {
     const subCategories = await SubCategory.find()
-      .populate({ path: "category", select: "name" }).populate({
+      .populate({ path: "category", select: "name" })
+      .populate({
         path: "products",
         model: "Product",
         select: "name price description",

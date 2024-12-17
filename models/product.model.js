@@ -34,6 +34,11 @@ const productSchema = new mongoose.Schema(
       ref: "SubCategory",
       required: true,
     },
+    serviceStatus: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
