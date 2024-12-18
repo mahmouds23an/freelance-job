@@ -21,15 +21,11 @@ const createPromoCode = async (req, res) => {
 };
 
 const getPromoCodes = async (req, res) => {
-  if (req.role !== "seller" && req.role !== "admin") {
+  if (req.role !== "admin") {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    const seller = req.userId;
-    const user = await User.findById(seller);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+   
     const promoCodes = await PromoCode.find().populate(
       "seller",
       "firstName lastName"
