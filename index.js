@@ -15,6 +15,7 @@ import userRoutes from "./routers/user.routes.js";
 import orderRoutes from "./routers/order.routes.js";
 import adminRoutes from "./routers/admin.routes.js";
 import googleAuthRoutes from "./routers/googleAuth.routes.js";
+import PromoCodeRoutes from "./routers/promoCode.routes.js";
 
 dotenv.config();
 const app = express();
@@ -28,7 +29,9 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(session({ secret: "your-secret-key", resave: false, saveUninitialized: true }));
+app.use(
+  session({ secret: "your-secret-key", resave: false, saveUninitialized: true })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(googleAuthRoutes);
@@ -54,6 +57,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/google", googleAuthRoutes);
+app.use("/api/promo", PromoCodeRoutes);
 
 const startServer = async () => {
   await connectDB();

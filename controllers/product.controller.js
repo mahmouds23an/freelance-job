@@ -8,14 +8,7 @@ const addProduct = async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    const {
-      name,
-      description,
-      price,
-      subCategory,
-      purchasableManyTimes,
-      status,
-    } = req.body;
+    const { name, description, price, subCategory } = req.body;
 
     const seller = req.userId;
 
@@ -59,9 +52,7 @@ const addProduct = async (req, res) => {
       description,
       price,
       subCategory,
-      purchasableManyTimes,
       seller,
-      status,
       fileUrl,
       image: imageUrls,
     });
