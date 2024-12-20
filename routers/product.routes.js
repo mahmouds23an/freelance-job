@@ -7,6 +7,7 @@ import {
   editReview,
   deleteReview,
   getProductReviews,
+  getSellerProducts,
   getSellerProductsById,
 } from "../controllers/product.controller.js";
 import upload from "../middlewares/multer.js";
@@ -36,6 +37,7 @@ router.delete("/delete-review/:productId", authMiddleware, deleteReview);
 router.get("/get-reviews/:productId", getProductReviews);
 
 // Seller Products
-router.get("/get-seller-products", authMiddleware, getSellerProductsById);
+router.get("/get-seller-products", authMiddleware, getSellerProducts);
+router.get("/get-seller-approved-products/:sellerId", getSellerProductsById);
 
 export default router;
