@@ -8,7 +8,14 @@ const addProduct = async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   try {
-    const { name, description, price, subCategory } = req.body;
+    const {
+      name,
+      description,
+      price,
+      subCategory,
+      discountedPrice,
+      discountStatus,
+    } = req.body;
 
     const seller = req.userId;
 
@@ -50,11 +57,14 @@ const addProduct = async (req, res) => {
     const newProduct = new Product({
       name,
       description,
-      price,
+      price: Number(price),
       subCategory,
       seller,
       fileUrl,
       image: imageUrls,
+      discountStatus: discountStatus === "true" ? true : false,
+      discountedPrice:
+        discountStatus === "true" ? Number(discountedPrice) : null,
     });
 
     await newProduct.save();
@@ -90,18 +100,29 @@ const editProduct = async (req, res) => {
   try {
     const seller = req.userId;
     const { productId } = req.params;
-    const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
-      req.body,
-      {
-        new: true,
-      }
-    );
-    if (updatedProduct.seller._id.toString() !== seller) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    const updates = {};
+
+    if (req.body.name) updates.name = req.body.name;
+    if (req.body.description) updates.description = req.body.description;
+    if (req.body.price) updates.price = Number(req.body.price);
+    if (req.body.category) updates.category = req.body.category;
+    if (req.body.subCategory) updates.subCategory = req.body.subCategory;
+
+    // Update discount fields
+    if (req.body.discountStatus !== undefined)
+      updates.discountStatus = req.body.discountStatus;
+    if (req.body.discountedPrice !== undefined)
+      updates.discountedPrice = Number(req.body.discountedPrice);
+
+    const updatedProduct = await Product.findByIdAndUpdate(productId, updates, {
+      new: true,
+    });
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (updatedProduct.seller._id.toString() !== seller) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
     return res.status(200).json({ message: "Product updated successfully" });
   } catch (error) {

@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema(
     description: { type: String, required: true },
     price: { type: Number, required: true },
     discountedPrice: { type: Number },
+    discountStatus: { type: Boolean, default: false },
     purchasableManyTimes: { type: Boolean, default: true },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
