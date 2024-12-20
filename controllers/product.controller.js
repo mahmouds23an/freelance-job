@@ -83,6 +83,60 @@ const getProducts = async (req, res) => {
   }
 };
 
+const editProduct = async (req, res) => {
+  if (req.role !== "seller") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const seller = req.userId;
+    const { productId } = req.params;
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      req.body,
+      {
+        new: true,
+      }
+    );
+    if (updatedProduct.seller._id.toString() !== seller) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    return res.status(200).json({ message: "Product updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteProduct = async (req, res) => {
+  if (req.role !== "admin" && req.role !== "seller") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const { productId } = req.params;
+    const sellerId = req.userId;
+
+    const deletedProduct = await Product.findById(productId);
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (
+      req.role === "seller" &&
+      deletedProduct.seller._id.toString() !== sellerId
+    ) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    await Product.findByIdAndDelete(productId);
+    return res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 const addReview = async (req, res) => {
   if (req.role !== "user") {
     return res.status(401).json({ error: "Unauthorized" });
@@ -233,6 +287,8 @@ const getSellerProductsById = async (req, res) => {
 export {
   addProduct,
   getProducts,
+  editProduct,
+  deleteProduct,
   addReview,
   editReview,
   deleteReview,

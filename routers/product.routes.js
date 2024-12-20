@@ -3,6 +3,8 @@ import express from "express";
 import {
   addProduct,
   getProducts,
+  editProduct,
+  deleteProduct,
   addReview,
   editReview,
   deleteReview,
@@ -29,6 +31,8 @@ router.post(
   addProduct
 );
 router.get("/get", getProducts);
+router.put("/edit/:productId", authMiddleware, editProduct);
+router.delete("/delete/:productId", authMiddleware, deleteProduct);
 
 // Reviews
 router.post("/add-review", authMiddleware, addReview);
