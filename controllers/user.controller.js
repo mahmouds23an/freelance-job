@@ -129,6 +129,34 @@ const userDeleteHisAccount = async (req, res) => {
   }
 };
 
+const userBecomeASeller = async (req, res) => {
+  try {
+    if (req.role === "admin") {
+      return res
+        .status(400)
+        .json({ message: "You are an admin, you cannot become a seller" });
+    }
+    const userId = req.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.role === "seller") {
+      return res.status(400).json({ message: "You are already a seller" });
+    }
+
+    user.role = "seller";
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ message: "Your role changed to seller successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   currentUser,
   editProfile,
@@ -136,4 +164,5 @@ export {
   changeAvatar,
   removeAvatar,
   userDeleteHisAccount,
+  userBecomeASeller,
 };

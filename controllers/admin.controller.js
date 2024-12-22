@@ -136,6 +136,33 @@ const getPendingProducts = async (req, res) => {
   }
 };
 
+const allUsers = async (req, res) => {
+  try {
+    if (req.role !== "admin") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const users = await User.find().select(
+      "-password -wallet -avatar -favorites -purchasedProducts -otp -createdAt -updatedAt -__v"
+    );
+    return res.status(200).json({ count: users.length, users });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+const adminDeleteUser = async (req, res) => {
+  try {
+    if (req.role !== "admin") {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const { userId } = req.params;
+    await User.findByIdAndDelete(userId);
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 export {
   adminApprovePendingProduct,
   adminApprovePendingSeller,
@@ -143,4 +170,6 @@ export {
   adminRefusePendingProduct,
   getPendingSellers,
   getPendingProducts,
+  allUsers,
+  adminDeleteUser,
 };
