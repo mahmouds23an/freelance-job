@@ -22,8 +22,6 @@ const productSchema = new mongoose.Schema(
     name: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: Number, required: true },
-    discountedPrice: { type: Number },
-    discountStatus: { type: Boolean, default: false },
     purchasableManyTimes: { type: Boolean, default: true },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
@@ -47,6 +45,7 @@ const productSchema = new mongoose.Schema(
     },
     fileUrl: { type: String, required: true },
     reviews: [reviewSchema],
+    promos: [{ type: mongoose.Schema.Types.ObjectId, ref: "PromoCode" }],
   },
   { timestamps: true }
 );

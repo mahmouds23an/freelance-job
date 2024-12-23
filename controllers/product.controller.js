@@ -80,7 +80,15 @@ const addProduct = async (req, res) => {
 
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({ status: "approved" });
+    const products = await Product.find({ status: "approved" }).populate({
+      path: "promos",
+      select: "code discount endDate isActive seller",
+      populate: {
+        path: "seller",
+        model: "User",
+        select: "firstName lastName email avatar",
+      },
+    });
     if (!products) {
       return res.status(404).json({ message: "Products not found" });
     }
