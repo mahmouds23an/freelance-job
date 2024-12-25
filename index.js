@@ -7,6 +7,7 @@ import passport from "passport";
 import session from "express-session";
 
 import connectCloudinary from "./utils/cloudinary.js";
+
 import authRoutes from "./routers/auth.routes.js";
 import productRoutes from "./routers/product.routes.js";
 import categoriesAndSubCategoriesRoutes from "./routers/categoriesAndSub-categories.routes.js";
@@ -16,7 +17,6 @@ import orderRoutes from "./routers/order.routes.js";
 import adminRoutes from "./routers/admin.routes.js";
 import googleAuthRoutes from "./routers/googleAuth.routes.js";
 import PromoCodeRoutes from "./routers/promoCode.routes.js";
-import passport from "./utils/googleAuth.js";
 
 dotenv.config();
 const app = express();
