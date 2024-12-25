@@ -16,6 +16,7 @@ import orderRoutes from "./routers/order.routes.js";
 import adminRoutes from "./routers/admin.routes.js";
 import googleAuthRoutes from "./routers/googleAuth.routes.js";
 import PromoCodeRoutes from "./routers/promoCode.routes.js";
+import passport from "./utils/googleAuth.js";
 
 dotenv.config();
 const app = express();
@@ -34,7 +35,6 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(googleAuthRoutes);
 
 const connectDB = async () => {
   try {
@@ -57,7 +57,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/google", googleAuthRoutes);
+app.use("/auth", googleAuthRoutes);
 app.use("/api/promo", PromoCodeRoutes);
 
 const startServer = async () => {
