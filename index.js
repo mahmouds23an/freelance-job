@@ -7,6 +7,7 @@ import passport from "passport";
 import session from "express-session";
 
 import connectCloudinary from "./utils/cloudinary.js";
+import passportSetup from "./utils/googleAuth.js"
 
 import authRoutes from "./routers/auth.routes.js";
 import productRoutes from "./routers/product.routes.js";

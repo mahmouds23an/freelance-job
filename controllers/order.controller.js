@@ -9,87 +9,39 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const placeOrder = async (req, res) => {
   try {
-    const { productId, paymentMethod, stripeToken } = req.body;
+    const { items } = req.body;
+    const { origin } = req.headers;
     const buyerId = req.userId;
 
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Service not found" });
-    }
-
-    const buyer = await User.findById(buyerId);
-    if (!buyer) {
-      return res.status(404).json({ message: "Buyer not found" });
-    }
-
-    if (buyer.purchasedProducts.includes(productId)) {
-      return res
-        .status(400)
-        .json({ message: "You cannot purchase a product you already own" });
-    }
-
-    if (String(product.seller) === String(buyerId)) {
-      return res
-        .status(400)
-        .json({ message: "You cannot buy your own service" });
-    }
-
-    let paymentStatus = "pending";
-    let transactionId = null;
-
-    if (paymentMethod === "wallet") {
-      if (buyer.wallet.balance < product.price) {
-        return res.status(400).json({ message: "Insufficient wallet balance" });
-      }
-
-      buyer.wallet.balance -= product.price;
-      buyer.wallet.transactions.push({
-        type: "debit",
-        amount: product.price,
-        description: `Payment for service: ${product.name}`,
-      });
-      paymentStatus = "completed";
-      await buyer.save();
-    } else if (paymentMethod === "credit") {
-      if (!stripeToken) {
-        return res.status(400).json({
-          message: "Stripe token is required for credit card payment",
-        });
-      }
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: product.price * 100,
-        currency: "usd",
-        payment_method_types: ["card"],
-        description: `Payment for service: ${product.name}`,
-        payment_method_data: { type: "card", token: stripeToken },
-        confirm: true,
-      });
-
-      if (paymentIntent.status !== "succeeded") {
-        return res.status(400).json({ message: "Stripe payment failed" });
-      }
-
-      transactionId = paymentIntent.id;
-      paymentStatus = "completed";
-    } else {
-      return res.status(400).json({ message: "Invalid payment method" });
-    }
-
-    const newOrder = new Order({
+    const orderData = {
+      items,
       buyer: buyerId,
-      seller: product.seller,
-      product: productId,
-      paymentStatus,
-      transactionId,
-    });
+      payment: false,
+    };
 
+    const newOrder = new Order(orderData);
     await newOrder.save();
 
-    buyer.purchasedProducts.push(productId);
-    await buyer.save();
+    const line_items = items.map((item) => ({
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: item.name,
+          image: [item.image[0]],
+          file: item.fileUrl,
+        },
+        unit_amount: item.price * 100,
+      },
+    }));
 
-    return res.status(201).json({ message: "Order placed successfully" });
+    const session = await stripe.checkout.sessions.create({
+      success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
+      cancel_url: `${origin}/verify?success=false&orderId=${newOrder._id}`,
+      line_items,
+      mode: "payment",
+    });
+
+    return res.status(200).json({ success: true, url: session.url });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

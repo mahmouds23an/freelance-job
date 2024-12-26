@@ -12,15 +12,14 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
+    items: {
+      type: Array,
       required: true,
     },
-    paymentStatus: {
-      type: String,
-      enum: ["pending", "completed", "failed"],
-      default: "pending",
+    payment: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
     transactionId: { type: String },
   },
